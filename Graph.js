@@ -112,7 +112,6 @@ Node.prototype.connectedTo = function(node) {
   return false;
 };
 
-
 function Edge(source, target) {
   this.source = source;
   this.target = target;

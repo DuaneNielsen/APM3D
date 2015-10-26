@@ -129,12 +129,21 @@ Layout.ForceDirected = function(graph, options) {
             }
 
             var force = (repulsion_constant * repulsion_constant) / delta_length;
+            var forceFunc = node_v.data['forceFunc'];
+            if (forceFunc != undefined )  {
+              force = forceFunc(force);
+            }
+              
             if(this.layout === "3d") {
               var force_z = (repulsion_constant * repulsion_constant) / delta_length_z;
+              if (forceFunc != undefined )  {
+                force_z = forceFunc(force);
+              }
             }
+            
+            node_v.layout.force += force;  
+            node_u.layout.force += force;  
 
-            node_v.layout.force += force;
-            node_u.layout.force += force;
 
             node_v.layout.offset_x += (delta_x / delta_length) * force;
             node_v.layout.offset_y += (delta_y / delta_length) * force;

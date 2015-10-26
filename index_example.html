@@ -21,16 +21,20 @@
     <script type="text/javascript" src="utils/TrackballControls.js"></script>
     <script type="text/javascript" src="utils/Label.js"></script>
     <script type="text/javascript" src="utils/ObjectSelection.js"></script>
+    <script type="text/javascript" src="utils/ColladaLoader.js"></script>
+    <script type="text/javascript" src="utils/Tween.js"></script>
     <script type="text/javascript" src="layouts/force-directed-layout.js"></script>
     <script type="text/javascript" src="drawings/simple_graph.js"></script>
     <script type="text/javascript" src="drawings/sphere_graph.js"></script>
-
+    <script type="text/javascript" src="drawings/appmap.js"></script>
+    
+    
     <script type="text/javascript">
       var drawing;
       function createDrawing() {
         var index = parseInt(location.search.split("?")[1]);
         if(isNaN(index)) {
-          index = 1;
+          index = 3;
         }
         /* Change these values to draw more nodes (numNodes) */
         switch(index) {
@@ -43,6 +47,9 @@
           case 2:
             drawing = new Drawing.SphereGraph({numNodes: 50, showStats: true, showInfo: true});
             break;
+          case 3:
+            drawing = new Drawing.Appmap({numNodes: 50, showStats: true, selection: true, showInfo: true});
+            break;
           default:
             drawing = new Drawing.SimpleGraph({layout: '3d', selection: true, numNodes: 50, showStats: true, showInfo: true});
         }
@@ -54,7 +61,7 @@
       body {
         margin: 0;
         padding: 0;
-        background-color: #f0f0f0;
+        background-color: #000000;
         font: 11px courier;
         overflow: hidden;
       }
@@ -84,6 +91,7 @@
             <option>2D-Force-Directed</option>
             <option selected="selected">3D-Force-Directed</option>
             <option>Sphere Graph</option>
+            <option>Appmap</option>
           </select>
         </p>
         <p>
