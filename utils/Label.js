@@ -30,6 +30,7 @@ THREE.Label = function(text, parameters) {
     var len = xc.measureText(text).width;
 
     labelCanvas.setAttribute('width', len);
+    xc.fillStyle = 'white';
 
     // set font size again cause it will be reset
     // when setting a new width

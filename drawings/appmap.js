@@ -68,12 +68,13 @@ Drawing.Appmap = function(options) {
   this.edges_count = options.numEdges || 10;
 
   var camera, controls, scene, renderer, interaction, object_selection;
+  var lookupTableOfNodeTypes;
   var particleSystem;
   var g1, g2;
   //var graphWalker, tweenChain, currentPosition, 
   var transactionPath = [ {node: 0, time: 1000, type: "BT"        }, 
                           {node: 1, time: 200,  type: "AppServer" },
-                          {node: 2, time: 2000, type: "Database " },
+                          {node: 2, time: 4000, type: "Database " },
                           {node: 2, time: 300,  type: "Database " }, 
                           {node: 1, time: 200,  type: "AppServer" },
                           {node: 3, time: 200,  type: "WebServiceClient"},
@@ -87,10 +88,30 @@ Drawing.Appmap = function(options) {
                           {node: 4, time: 200,  type: "WebServiceServer"},
                           {node: 5, time: 200,  type: "Database"},
                           {node: 4, time: 200,  type: "WebServiceServer"},
-                          {node: 5, time: 200,  type: "Database"},                          
                           {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
                           {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
                           {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
+                          {node: 5, time: 200,  type: "Database"},
+                          {node: 4, time: 200,  type: "WebServiceServer"},
                           {node: 5, time: 200,  type: "Database"},                          
                           {node: 4, time: 200,  type: "WebServiceServer"},
                           {node: 3, time: 200,  type: "WebServiceClient"},
@@ -191,9 +212,11 @@ Drawing.Appmap = function(options) {
 				skin = collada.skins[ 0 ];
 
 				dae.scale.x = dae.scale.y = dae.scale.z = 50.0;
-				dae.rotateOnAxis(new THREE.Vector3(1,0,0),2.0);
+				dae.rotateOnAxis(new THREE.Vector3(1,0,0),1.5);
 				dae.updateMatrix();
 
+
+        buildLookupTableOfNodeTypes();
 				init();
         createGraph();
         animate();
@@ -286,8 +309,23 @@ Drawing.Appmap = function(options) {
     return graph.getNode(nodeID) != undefined;
   }
   
+  function buildLookupTableOfNodeTypes() {
+  
+  var database = {'object3D':dae};
+  
+  lookupTableOfNodeTypes = {
+    'Database':database
+    //'Database':{'geometry': meshes['cube']}
+  };
+  
+  }
+  
   function lookupOptionsForType(type) {
-    return {'geometry': meshes['sphere']};
+    var options = lookupTableOfNodeTypes[type];
+    if ( options != undefined )
+      return options;
+    else
+     return {'geometry': meshes['cube']};
   }
   
   function parseTransactionPath(transactionPath) {
@@ -342,7 +380,7 @@ Drawing.Appmap = function(options) {
     info_text.edges = "Edges " + graph.edges.length;
     
     g1 = new GraphWalker({color:0xffff00});
-    g2 = new GraphWalker({color:0x00ff00});
+    //g2 = new GraphWalker({color:0x00ff00});
     
   }
 
@@ -354,6 +392,7 @@ Drawing.Appmap = function(options) {
     this.material = new THREE.MeshBasicMaterial( {color: this.color} );
     this.graphWalker = new THREE.Mesh(this.geo,this.material);
     this.currentPosition;
+    this.prev_pos;
     this.tweenChain;
     var node = graph.nodes[0];
     if ( node != undefined ) {
@@ -362,23 +401,45 @@ Drawing.Appmap = function(options) {
     
     this.num_particles = options['num_particles'] || 60;
     this.cur_particle = 0;
+    this.particle_per_redraw = 4; // how many particles in a redraw
     var pMaterial = new THREE.ParticleBasicMaterial({
               color: this.color,
-              size: 100
+              opacity: 0.5,
+              size: 500,
+              map: THREE.ImageUtils.loadTexture("models/particle.png"),
+              blending: THREE.AdditiveBlending,
+              transparent: true,
+              depthWrite: false
             });    
     this.particle_list = new THREE.Geometry();
     for ( var i = 0; i < this.num_particles; i++) {
-      this.particle_list.vertices.push(new THREE.Vector3());
+      this.particle_list.vertices.push(new THREE.Vector3().set(10000,10000,10000));
     }
     var  particleSystem = new THREE.ParticleSystem(this.particle_list, pMaterial );
+    particleSystem.sortParticles = true;
     scene.add(particleSystem);
 
     
     this.tweenUpdate = function () {
-      that.graphWalker.position.set(that.currentPosition.x,that.currentPosition.y,that.currentPosition.z);
-        that.particle_list.vertices[that.cur_particle%that.num_particles].set(that.currentPosition.x,that.currentPosition.y,that.currentPosition.z);
-        that.cur_particle ++;
+      
+      function updateParticles() {
+        
+        if (that.prev_pos != undefined) {
+          var trailVector = that.prev_pos.clone().sub(that.graphWalker.position);
+          for (var p = 1; p <= that.particle_per_redraw; p++) {
+            var scalar = p/that.particle_per_redraw;
+            var particleVector = trailVector.clone().multiplyScalar(scalar);
+            var trailPos1 = that.graphWalker.position.clone().add(particleVector);
+            that.particle_list.vertices[that.cur_particle%that.num_particles].copy(trailPos1);
+            that.cur_particle ++;
+          }
         that.particle_list.verticesNeedUpdate = true;
+        }
+        that.prev_pos = that.graphWalker.position.clone();
+      }
+      
+      that.graphWalker.position.set(that.currentPosition.x,that.currentPosition.y,that.currentPosition.z);
+      updateParticles();
     }
     
   }
@@ -432,8 +493,8 @@ Drawing.Appmap = function(options) {
     var opts = opts ||  {};
     var geometry = opts['geometry'] || meshes['cube'];
     var material = new THREE.MeshBasicMaterial( {  color: Math.random() * 0xffffff, opacity: 0.5 } );
-    var draw_object = opts['object3D'] || new THREE.Mesh( geometry , material);
-
+    var draw_object;
+    if ( opts['object3D'] != undefined )  draw_object =  opts['object3D'].clone(); else draw_object = new THREE.Mesh( geometry , material);
 
     if(that.show_labels) {
       if(node.data.title != undefined) {

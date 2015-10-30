@@ -1,0 +1,475 @@
+<!--[if IE ]><![endif]-->
+<!DOCTYPE html>
+<!-- <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> -->
+<!--[if lt IE 7 ]> <html class="no-js ie6 oldie lang_de" lang="de"> <![endif]-->
+<!--[if IE 7 ]>    <html class="no-js ie7 oldie lang_de" lang="de"> <![endif]-->
+<!--[if IE 8 ]>    <html class="no-js ie8 oldie lang_de" lang="de"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html class="no-js compliant lang_de" lang="de"> <!--<![endif]-->
+	<head>
+
+<!-- 
+
+                   . .                  
+                 .$7778...+=..      .   
+   .          .,III77777777777..   .    
+     ..    ..7II++I777777777777$..      
+       ,   .IIII7II777777877777I7:.     
+           .IIIIIII777777777777777.     
+       .DIIIIIIIIII77777777777777D.     
+    ...I?IIII?IIIII77777777777777$$D..  
+ ...IIIIIIIIIIII7ID77777777777777$$$Z.  
+ .IIIIII?IIIIIIIIII7777I777777777$$$$D  
+ ?IIZDDI8$$IIIIIIII777?7777777777$$$$$. 
+ .IIIII$$I7$$8I$8II$$O7IIZ7777777$$D$8  
+ ZI?III?$+DOD8O8ZO7ZZZZ7Z?7I777$787$8.  
+ .?IIIIII?OZZD88$$$$$$7I77777??$8$7:    
+ ...IIIIIIIII .$D$$$DO77777777777$?.    
+    ~II???II.   .$$$Z$$Z7O77DD77.       
+      .:Z+.    .$$$$ZD......877Z        
+           .   .D8$$ZD      .           
+                .8O$$D                  
+       .       .D$$$ZD         .        
+               .$$$$$$.                 
+              D$$$$$$$O$.               
+   .        .$$?...$$8$..$Z~          
+
+                                                                  __ /\_ \     
+  ___ ___      __     _ __    __      ___          __    ___ ___ /\_\\//\ \    
+/' __` __`\  /'__`\  /\`'__\/'__`\  /' _ `\      /'__`\/' __` __`\/\ \ \ \ \   
+/\ \/\ \/\ \/\ \L\.\_\ \ \//\ \L\.\_/\ \/\ \    /\  __//\ \/\ \/\ \ \ \ \_\ \_ 
+\ \_\ \_\ \_\ \__/.\_\\ \_\\ \__/.\_\ \_\ \_\   \ \____\ \_\ \_\ \_\ \_\/\____\
+ \/_/\/_/\/_/\/__/\/_/ \/_/ \/__/\/_/\/_/\/_/    \/____/\/_/\/_/\/_/\/_/\/____/
+                                                                               
+
+ _     _             _ ____                              _                      _       
+| |__ | |_ _ __ ___ | | ___|    _____  ___ __   ___ _ __(_)_ __ ___   ___ _ __ | |_ ___ 
+| '_ \| __| '_ ` _ \| |___ \   / _ \ \/ / '_ \ / _ \ '__| | '_ ` _ \ / _ \ '_ \| __/ __|
+| | | | |_| | | | | | |___) | |  __/>  <| |_) |  __/ |  | | | | | | |  __/ | | | |_\__ \
+|_| |_|\__|_| |_| |_|_|____/   \___/_/\_\ .__/ \___|_|  |_|_| |_| |_|\___|_| |_|\__|___/
+                                        |_|                                             
+                                                                               
+...........................................................
+
+Ascii Generator - http://www.network-science.de/ascii/
+
+Font: larry3d  
+Font: ogre
+Font: rectangles 
+Font: rounded 
+Font: shadow 
+Font: slant
+Font: small  
+Font: smslant
+Font: standard 
+Font: stop
+
+...........................................................
+
+GlassGiant.com 
+http://www.glassgiant.com/ascii/
+
+...........................................................
+
+-->
+		<title>3D Horizontal Canvas Carousel using Three.js - example by Emil Maran</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			a { color: #000000; }
+		</style>
+	</head>
+	<body>
+
+		<canvas id="debug" style="position:absolute; left:10px"></canvas>
+
+		<script src="js/Three.js" type="text/javascript" ></script>
+		<script src="js/RequestAnimationFrame.js"></script>
+		<script src="js/Stats.js" type="text/javascript" ></script>
+
+		<script>
+
+			var container, stats;
+
+			var camera, scene, renderer, target;
+			var texture_placeholder;
+			var mouseX = 0, mouseY = 0;
+
+			var text, plane;
+
+			var targetRotation = 0;
+			var targetRotationOnMouseDown = 0;
+
+			var mouseX = 0;
+			var mouseXOnMouseDown = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			var radious = 1600, theta = 45, onMouseDownTheta = 45, phi = 60, onMouseDownPhi = 60, isShiftDown = false; 
+
+			var particle;
+			var particles = []; 
+			//var particleImage = new Image();
+			//THREE.ImageUtils.loadTexture( "img/ParticleSmoke.png" );
+			//particleImage.src = 'img/ParticleSmoke.png';
+
+			init();
+			animate();
+
+			//////////////////////////////////////////////////////////////////////
+			//
+			// init
+			//
+			//////////////////////////////////////////////////////////////////////
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				var info = document.createElement( 'div' );
+				info.style.position = 'absolute';
+				info.style.top = '10px';
+				info.style.width = '100%';
+				info.style.color = '#ffffff';
+				info.style.textAlign = 'center';
+
+				//info.innerHTML = '3D Vertical Canvas Carousel using Three.js example by <a href="http://www.maran-emil.de">emil maran</a> <br />';
+				//info.innerHTML += 'Builded with <a href="http://github.com/mrdoob/three.js" target="_blank">three.js</a> <br /> ';
+				//info.innerHTML += '  Drag to spin | Works in FF, Chrome & Safari only ';
+				container.appendChild( info );
+
+				/*camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 10, 5000 ); // TrackballCamera  PerspectiveCamera OrthographicCamera TrackballControls
+				camera.position.y = 150;
+				camera.position.z = 800;*/
+
+				camera = new THREE.PerspectiveCamera( 65, window.innerWidth / window.innerHeight, 10,  2500 ); // FlyCamera // FlyControls
+				camera.movementSpeed = 100.0;
+				camera.rollSpeed = 0.5;
+				camera.position.y = 60;
+				camera.position.z = 500;
+
+				scene = new THREE.Scene();
+
+				parent = new THREE.Object3D();
+				parent.position.y = 60;
+				scene.add( parent );
+
+				//////////////////////////////////////////////////////////////////////
+				//
+				// lights
+				//
+				//////////////////////////////////////////////////////////////////////
+
+				var light = new THREE.DirectionalLight( 0xffffff );
+				light.position.set( 10, 10, 11 );
+				light.position.normalize();
+				parent.add( light );
+
+				pointLight = new THREE.PointLight( 0xffffff, 0.9 );
+				parent.add( pointLight );
+
+				////////////////////////////////////////////////////////////////////////
+				//
+				// Generate 3D Planes in Radius circle
+				//
+				////////////////////////////////////////////////////////////////////////
+
+				var materials = [
+					//loadTexture( 'img/ter.jpg' ), // right
+				];
+
+				var arImgRotator = {
+					"0":"P1000528.jpg",
+					"1":"P1000528.jpg",
+					"2":"P1000528.jpg",
+					"3":"P1000528.jpg",
+					"4":"P1000528.jpg",
+					"5":"P1000528.jpg",
+					"6":"P1000528.jpg",
+					"7":"P1000528.jpg",
+					"8":"P1000528.jpg",
+					"9":"P1000528.jpg",
+					"10":"P1000528.jpg",
+					"11":"P1000528.jpg"
+				}
+
+				//mesh = new THREE.Mesh( new THREE.CubeGeometry( 2700, 2700, 2700, 2, 3, 6, materials ), new THREE.MeshFaceMaterial({overdraw: true}) );
+				//var planeMat = THREE.ImageUtils.loadTexture("img/ter.jpg");
+				//var planeTex = new THREE.MeshBasicMaterial( { map: new THREE.Texture( planeMat, THREE.RepeatWrapping, THREE.RepeatWrapping ) } );
+
+				//planeTex.map.repeat.set( 10, 10 );
+				//geometry = new THREE.PlaneGeometry( 600, 600, 100, 100 );
+				//ground = new THREE.Mesh( geometry, planeTex );
+
+
+				var camSize = 100;
+				var startAngle = 0;
+				var circleRadius = 210;
+				var diameter = circleRadius*4;
+				var centerX = -5;
+				var centerZ = 0.5; // -2.5
+
+				var mpi = Math.PI/180;
+				var startRadians = startAngle + mpi;
+				var totalSpheres = 12;
+				var incrementAngle = 360/totalSpheres;
+				var incrementRadians = incrementAngle * mpi;
+
+				for ( var i = 0; i < totalSpheres; i ++ ) {
+
+					var xp = centerX + Math.sin(startRadians) * circleRadius;
+					var zp = centerZ + Math.cos(startRadians) * circleRadius;
+
+					//var planObj = new THREE.Mesh( new THREE.PlaneGeometry( camSize, .45*camSize ), new THREE.MeshBasicMaterial( { color: 0xffffff, overdraw: false  } ) );
+					
+					var planObj = new THREE.Mesh( 
+						new THREE.PlaneGeometry( camSize, .85*camSize),
+						new THREE.MeshBasicMaterial( {  
+						map: THREE.ImageUtils.loadTexture( 'img/'+arImgRotator[i]),
+						doubleSided: false, 
+						wireframe: false,
+						overdraw: true
+					})
+					
+					);
+
+					// Vertical Items on Circle -
+					planObj.position.z = xp;
+					planObj.position.y = zp;
+					planObj.rotation.x = i*(incrementAngle) * (Math.PI/180) +55;     //    tangenta
+					
+					//console.log(planObj.rotation.y);
+					startRadians += incrementRadians;
+					particles.push(planObj); 
+					parent.add( planObj );
+					
+
+				}
+
+
+
+
+
+
+
+
+				// -------------------------------------------------------------------------------------------------
+				// Lights 
+				// -------------------------------------------------------------------------------------------------
+
+		
+				/*scene.add( new THREE.AmbientLight( Math.random() * 0xff0000 ) );
+
+				var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
+				directionalLight.position.x = Math.random() - 0.1;
+				directionalLight.position.y = Math.random() - 0.3;
+				directionalLight.position.z = Math.random() - 0.3;
+				directionalLight.position.normalize();
+				scene.add( directionalLight );
+
+				pointLight = new THREE.PointLight( 0xffffff, 1 );
+				scene.add( pointLight );
+
+				// add subtle ambient lighting
+				var lightSecond = new THREE.SpotLight( 0xffffff, 1 );
+				lightSecond.position.set( 290, 330, -160 );
+				scene.add(lightSecond);
+
+				// add subtle ambient lighting
+				var ambientLight = new THREE.AmbientLight(0xffffff);
+				scene.add(ambientLight);
+
+				// add directional light source
+				var directionalLight = new THREE.DirectionalLight(0xffffff);
+				directionalLight.position.set(1, 1, 1).normalize();
+				scene.add(directionalLight);*/
+
+
+
+				//////////////////////////////////////////////////////////////////////
+				//
+				//  Render 
+				//
+				//////////////////////////////////////////////////////////////////////
+
+				renderer = new THREE.CanvasRenderer( { /*antialias: true*/ } ); // WebGLRenderer
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColorHex( 0x555555, 0.9 );
+				container.appendChild( renderer.domElement );
+
+				//////////////////////////////////////////////////////////////////////
+				//
+				//  stats 
+				//
+				//////////////////////////////////////////////////////////////////////
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+
+				//////////////////////////////////////////////////////////////////////
+				//
+				//  addEventListener 
+				//
+				//////////////////////////////////////////////////////////////////////
+
+				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				//document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				//document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+				document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
+
+
+			}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+				//////////////////////////////////////////////////////////////////////
+				//
+				//  Mouse events
+				//
+				//////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			
+			function loadImage( path ) {
+
+				var image = document.createElement( 'img' );
+				var texture = new THREE.Texture( image, THREE.UVMapping )
+
+				image.onload = function () { texture.needsUpdate = true; };
+				image.src = path;
+
+				return texture;
+
+			}
+			
+
+//
+
+			function loop() {
+
+			for(var i = 0; i < particles.length; i++)
+				{
+
+					var particle = particles[i]; 
+					particle.updatePhysics(); 
+	
+					with(particle.position)
+					{
+						if(y<-1000) y+=2000; 
+						if(x>1000) x-=2000; 
+						else if(x<-1000) x+=2000; 
+						if(z>1000) z-=2000; 
+						else if(z<-1000) z+=2000; 
+					}				
+				}
+			
+				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+				camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+				camera.lookAt(scene.position);
+				renderer.render( scene, camera );
+
+				
+			}
+
+			//////////////////////////////////////////////////////////////////////
+			//
+			//  loadTexture
+			//
+			//////////////////////////////////////////////////////////////////////
+
+			function loadTexture( path ) {
+
+				var texture = new THREE.Texture( texture_placeholder );
+				var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: true } );
+
+				var image = new Image();
+				image.onload = function () {
+
+					texture.needsUpdate = true;
+					material.map.image = this;
+
+					render();
+
+				};
+				image.src = path;
+
+				return material;
+
+			}
+
+			//////////////////////////////////////////////////////////////////////
+			//
+			//  onDocumentMouseWheel
+			//
+			//////////////////////////////////////////////////////////////////////
+
+			function onDocumentMouseWheel( event ) {
+				//camera.position.x =  Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
+				//camera.position.y =  Math.sin( phi * Math.PI / 360 );
+				camera.position.y =  Math.cos( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
+				camera.updateMatrix();
+				//render();
+				//camera.position.y += ( - mouseY - camera.position.y ) * .05;
+				camera.lookAt( target );
+
+			}
+
+			function onDocumentMouseDown( event ) {
+				event.preventDefault();
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+				mouseYOnMouseDown = event.clientY - windowHalfY;
+				targetRotationOnMouseDown = targetRotation;
+			}
+
+			//var r = 0, counter = 0;
+			function onDocumentMouseMove( event ) {
+				mouseX = event.clientX - windowHalfX;
+				mouseY = event.clientY - windowHalfY;
+				targetRotation = targetRotationOnMouseDown + ( mouseY - mouseYOnMouseDown ) * 0.02;
+				//camera.position.y =  Math.sin( theta * Math.PI / 360 ) * Math.cos( phi * Math.PI / 360 );
+				render();
+			}
+
+			function onDocumentMouseUp( event ) {
+				document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+				document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+			}
+
+			function onDocumentMouseOut( event ) {
+				document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+				document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+				stats.update();
+			}
+
+			function render() {
+				parent.rotation.x += ( targetRotation - parent.rotation.x ) * 0.05;
+				//parent.rotation.z = -0.05;
+				//camera.rotation.x = -0.05;
+				renderer.render( scene, camera );
+			}
+
+		</script>
+
+
+</body></html>
